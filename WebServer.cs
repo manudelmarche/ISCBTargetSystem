@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Net;
+using System.Text;
 using System.Threading;
 using nanoFramework.Runtime.Native;
 
@@ -101,7 +102,8 @@ namespace ISCBTargetSystem
 
                         response.ContentType = "text/html";
                         pageBytes = Resources.GetBytes(Resources.BinaryResources.countdown);
-                        responseString = System.Text.Encoding.UTF8.GetString(pageBytes, 0, pageBytes.Length);
+                        responseString = ProcessCountdown(System.Text.Encoding.UTF8.GetString(pageBytes, 0, pageBytes.Length),countdown);
+                        
                     }
                     else if (originator == "countdown")
                     {
@@ -136,6 +138,13 @@ namespace ISCBTargetSystem
             //    Thread.Sleep(200);
             //    Power.RebootDevice();
             //}
+        }
+
+        private string ProcessCountdown(String page, string countdown)
+        {
+            StringBuilder stringBuilder = new StringBuilder(page);
+            stringBuilder.Replace("{{countdownValue}}",countdown);
+            return stringBuilder.ToString();
         }
 
         static string ReplaceMessage(string page, string message)
