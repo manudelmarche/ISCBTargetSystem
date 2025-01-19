@@ -66,9 +66,9 @@
         }        
     </style>
 
-    <title>ISCB Targets System - Countdown</title>
+    <title>ISCB Targets System - Shooting</title>
     <script>
-        let countdown = {{countdownValue}};
+        let countdown = 10;
         function updateCountdown() {
             document.getElementById("countdown").innerText = countdown;
             if (countdown === 0) {
@@ -84,10 +84,10 @@
     </script>
 </head>
 <body>
-    <h1>Stand by</h1>
+    <h1>Shooting in progress</h1>
     <span id="countdown" class="countdown center-screen">10</span>
     <form id="countdownForm" method="POST">
-        <input type="hidden" id="originator" name="originator" value="countdown" />
+        <input type="hidden" id="originator" name="originator" value="shooting" />
     </form>
     <span class="copyright">© ISCB 2024</span>
 </body>

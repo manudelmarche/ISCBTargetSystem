@@ -34,6 +34,7 @@ namespace ISCBTargetSystem
         {
             favicon = -22914,
             mainPage = -5248,
+            shooting = -894,
             countdown = 29543,
         }
     }

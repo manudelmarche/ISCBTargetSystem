@@ -30,6 +30,7 @@
     <Compile Include="Wireless80211.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\Html\shooting.html" />
     <None Include="packages.config" />
     <None Include="Resources\Images\favicon.png" />
     <Content Include="Resources\Html\countdown.html" />
