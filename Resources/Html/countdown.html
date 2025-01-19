@@ -69,25 +69,31 @@
     <title>ISCB Targets System - Countdown</title>
     <script>
         let countdown = {{countdownValue}};
+        var timeoutID;
         function updateCountdown() {
             document.getElementById("countdown").innerText = countdown;
             if (countdown === 0) {
                 document.getElementById("countdownForm").submit();
             } else {
                 countdown--;
-                setTimeout(updateCountdown, 1000);
+                timeoutID= setTimeout(updateCountdown, 1000);
             }
         }
         window.onload = function() {
             updateCountdown();
         };
+
+        function abort_click(){
+            clearTimeout(timeoutID);
+            alert("aborted");
+        }
     </script>
 </head>
 <body>
     <h1>Stand by</h1>
     <span id="countdown" class="countdown center-screen">10</span>
     <form id="countdownForm" method="POST">
-        <input type="submit" value="Abort" id="abort" name="abort">
+        <input type="submit" value="Abort" id="abort" name="abort" onclick="abort_click()">
         <input type="hidden" id="originator" name="originator" value="countdown" />
     </form>
     <span class="copyright">© ISCB 2024</span>
