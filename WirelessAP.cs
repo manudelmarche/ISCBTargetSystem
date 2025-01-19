@@ -8,6 +8,9 @@ using System;
 using System.Net;
 using System.Net.NetworkInformation;
 using Iot.Device.DhcpServer;
+using Iot.Device.MulticastDns;
+using Iot.Device.MulticastDns.EventArgs;
+using Iot.Device.MulticastDns.Entities;
 using nanoFramework.Runtime.Native;
 
 namespace ISCBTargetSystem
@@ -54,9 +57,29 @@ namespace ISCBTargetSystem
                 Power.RebootDevice();
             }
 
+            MulticastDnsService multicastDNSService = new();
+            multicastDNSService.MessageReceived += MulticastDNSService_MessageReceived;
+
+            CnameRecord cname = new CnameRecord("ISCB", "ISCB");
+            cname.Target = SoftApIP;
+            ARecord aRecord = new ARecord("ISCB", IPAddress.Parse( SoftApIP));
+
+            multicastDNSService.Start();
+
             Console.WriteLine($"Running Soft AP, waiting for client to connect");
             Console.WriteLine($"Soft AP IP address :{GetIP()}");
         }
+
+        private static void MulticastDNSService_MessageReceived(object sender, MessageReceivedEventArgs e)
+        {
+            foreach(var question in e.Message.GetQuestions())
+            {
+                Console.WriteLine(question.Domain+ " - "+question.QueryClass+" - "+question.QueryType);
+
+            }
+        }
+
+
 
         /// <summary>
         /// Disable the Soft AP for next restart.
@@ -87,6 +110,8 @@ namespace ISCBTargetSystem
 
             // Set up IP address for Soft AP
             ni.EnableStaticIPv4(SoftApIP, "255.255.255.0", SoftApIP);
+            ni.EnableStaticIPv4Dns(new string[] { SoftApIP });
+            
 
             // Set Options for Network Interface
             //

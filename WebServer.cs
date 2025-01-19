@@ -106,9 +106,19 @@ namespace ISCBTargetSystem
                     }
                     else if (originator == "countdown")
                     {
-                        response.ContentType = "text/html";
-                        pageBytes = Resources.GetBytes(Resources.BinaryResources.shooting);
-                        responseString = System.Text.Encoding.UTF8.GetString(pageBytes, 0, pageBytes.Length);
+                        var abort = (string)hashPars["abort"];
+                        if(abort==null)
+                        {
+                            response.ContentType = "text/html";
+                            pageBytes = Resources.GetBytes(Resources.BinaryResources.shooting);
+                            responseString = System.Text.Encoding.UTF8.GetString(pageBytes, 0, pageBytes.Length);
+                        }
+                        else
+                        {
+                            response.ContentType = "text/html";
+                            pageBytes = Resources.GetBytes(Resources.BinaryResources.mainPage);
+                            responseString = System.Text.Encoding.UTF8.GetString(pageBytes, 0, pageBytes.Length);
+                        }
                     }
                     else if (originator == "shooting")
                     {

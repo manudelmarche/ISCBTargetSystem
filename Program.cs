@@ -6,9 +6,11 @@
 
 using System;
 using System.Device.Gpio;
+using System.Device.Wifi;
 using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Text;
 using System.Threading;
 using Iot.Device.DhcpServer;
 using nanoFramework.Networking;
@@ -40,6 +42,7 @@ namespace ISCBTargetSystem
             if (setupButton.Read() == PinValue.High)
             {
                 WirelessAP.SetWifiAp();
+                //NetworkChange.NetworkAPStationChanged += NetworkChange_NetworkAPStationChanged;
                 _wifiApMode = true;
             }
             else
@@ -58,47 +61,59 @@ namespace ISCBTargetSystem
             Thread.Sleep(Timeout.Infinite);
         }
 
+        //private static void NetworkChange_NetworkAPStationChanged(int NetworkIndex, NetworkAPStationEventArgs e)
+        //{
+        //    Console.WriteLine("A device connected or disconnected");
+        //    //WifiAdapter wifi = WifiAdapter.FindAllAdapters()[0];
+        //    //WirelessAPConfiguration bucht=new WirelessAPConfiguration((uint)NetworkIndex);
+        //    //var stations=bucht.GetConnectedStations();
+        //    //foreach (var station in stations)
+        //    //{
+        //    //    Console.WriteLine(Encoding.UTF8.GetString(station.MacAddress, 0, station.MacAddress.Length));
+        //    //}
+
+        //}
         /// <summary>
         /// Event handler for Stations connecting or Disconnecting
         /// </summary>
         /// <param name="NetworkIndex">The index of Network Interface raising event</param>
         /// <param name="e">Event argument</param>
-        private static void NetworkChange_NetworkAPStationChanged(int NetworkIndex, NetworkAPStationEventArgs e)
-        {
-            Debug.WriteLine($"NetworkAPStationChanged event Index:{NetworkIndex} Connected:{e.IsConnected} Station:{e.StationIndex} ");
+        //private static void NetworkChange_NetworkAPStationChanged(int NetworkIndex, NetworkAPStationEventArgs e)
+        //{
+        //    Debug.WriteLine($"NetworkAPStationChanged event Index:{NetworkIndex} Connected:{e.IsConnected} Station:{e.StationIndex} ");
 
-            // if connected then get information on the connecting station 
-            if (e.IsConnected)
-            {
-                WirelessAPConfiguration wapconf = WirelessAPConfiguration.GetAllWirelessAPConfigurations()[0];
-                WirelessAPStation station = wapconf.GetConnectedStations(e.StationIndex);
+        //    // if connected then get information on the connecting station 
+        //    if (e.IsConnected)
+        //    {
+        //        WirelessAPConfiguration wapconf = WirelessAPConfiguration.GetAllWirelessAPConfigurations()[0];
+        //        WirelessAPStation station = wapconf.GetConnectedStations(e.StationIndex);
 
-                string macString = BitConverter.ToString(station.MacAddress);
-                Debug.WriteLine($"Station mac {macString} Rssi:{station.Rssi} PhyMode:{station.PhyModes} ");
+        //        string macString = BitConverter.ToString(station.MacAddress);
+        //        Debug.WriteLine($"Station mac {macString} Rssi:{station.Rssi} PhyMode:{station.PhyModes} ");
 
-                _connectedCount++;
+        //        _connectedCount++;
 
-                // Start web server when it connects otherwise the bind to network will fail as 
-                // no connected network. Start web server when first station connects 
-                if (_connectedCount == 1)
-                {
-                    // Wait for Station to be fully connected before starting web server
-                    // other you will get a Network error
-                    Thread.Sleep(2000);
-                    _server.Start();
-                }
-            }
-            else
-            {
-                // Station disconnected. When no more station connected then stop web server
-                if (_connectedCount > 0)
-                {
-                    _connectedCount--;
-                    if (_connectedCount == 0)
-                        _server.Stop();
-                }
-            }
+        //        // Start web server when it connects otherwise the bind to network will fail as 
+        //        // no connected network. Start web server when first station connects 
+        //        if (_connectedCount == 1)
+        //        {
+        //            // Wait for Station to be fully connected before starting web server
+        //            // other you will get a Network error
+        //            Thread.Sleep(2000);
+        //            _server.Start();
+        //        }
+        //    }
+        //    else
+        //    {
+        //        // Station disconnected. When no more station connected then stop web server
+        //        if (_connectedCount > 0)
+        //        {
+        //            _connectedCount--;
+        //            if (_connectedCount == 0)
+        //                _server.Stop();
+        //        }
+        //    }
 
-        }
+        //}
     }
 }
