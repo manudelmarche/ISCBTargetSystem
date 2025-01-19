@@ -32,6 +32,7 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="Resources\Images\favicon.png" />
+    <Content Include="Resources\Html\countdown.html" />
     <Content Include="Resources\Html\main.html" />
   </ItemGroup>
   <ItemGroup>

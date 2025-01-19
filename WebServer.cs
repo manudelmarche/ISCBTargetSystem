@@ -7,6 +7,7 @@
 using System;
 using System.Collections;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Threading;
@@ -53,10 +54,14 @@ namespace ISCBTargetSystem
         {
             var request = context.Request;
             var response = context.Response;
-            string responseString;
-            string ssid = null;
-            string password = null;
+            string responseString="";
+            string timeShown = null;
+            string timeHidden = null;
+            string repetitions = null;
+            string countdown = null;
+            string originator=null;
             bool isApSet = false;
+            byte[] pageBytes;
 
             switch (request.HttpMethod)
             {
@@ -71,8 +76,8 @@ namespace ISCBTargetSystem
                     else
                     {
                         response.ContentType = "text/html";
-                        var pageBytes = Resources.GetBytes(Resources.BinaryResources.mainPage);
-                        responseString = ReplaceMessage(System.Text.Encoding.UTF8.GetString(pageBytes,0,pageBytes.Length-1), "");
+                        pageBytes = Resources.GetBytes(Resources.BinaryResources.mainPage);
+                        responseString = ReplaceMessage(System.Text.Encoding.UTF8.GetString(pageBytes,0,pageBytes.Length), "");
                         OutPutResponse(response, responseString);
                     }
                     break;
@@ -80,20 +85,39 @@ namespace ISCBTargetSystem
                 case "POST":
                     // Pick up POST parameters from Input Stream
                     Hashtable hashPars = ParseParamsFromStream(request.InputStream);
-                    ssid = (string)hashPars["ssid"];
-                    password = (string)hashPars["password"];
+                    originator = (string)hashPars["originator"];
 
-                    Debug.WriteLine($"Wireless parameters SSID:{ssid} PASSWORD:{password}");
-
-                    string message = "<p>New settings saved.</p><p>Rebooting device to put into normal mode</p>";
-
-                    bool res = Wireless80211.Configure(ssid, password);
-                    if (res)
+                    if (originator == "main")
                     {
-                        message += $"<p>And your new IP address should be {Wireless80211.GetCurrentIPAddress()}.</p>";
-                    }                                           
+                        timeShown = (string)hashPars["timeShown"];
+                        timeHidden = (string)hashPars["timeHidden"];
+                        repetitions = (string)hashPars["repetition"];
+                        countdown = (string)hashPars["countdown"];
 
-                    responseString = CreateMainPage(message);
+                        Debug.WriteLine($"Time targets are shown:" + timeShown);
+                        Debug.WriteLine($"Time targets are hidden:" + timeHidden);
+                        Debug.WriteLine($"Repetitions:" + repetitions);
+                        Debug.WriteLine($"Countdown:" + countdown);
+
+                        response.ContentType = "text/html";
+                        pageBytes = Resources.GetBytes(Resources.BinaryResources.countdown);
+                        responseString = System.Text.Encoding.UTF8.GetString(pageBytes, 0, pageBytes.Length);
+                    }
+                    else if (originator == "countdown")
+                    {
+                        responseString = "Target practice started";
+                    }
+
+
+                    //bool res = Wireless80211.Configure(ssid, password);
+                    //if (res)
+                    //{
+                    //    message += $"<p>And your new IP address should be {Wireless80211.GetCurrentIPAddress()}.</p>";
+                    //}                                           
+
+                    //responseString = CreateMainPage(message);
+
+
 
                     OutPutResponse(response, responseString);
                     isApSet = true;
@@ -102,16 +126,16 @@ namespace ISCBTargetSystem
 
             response.Close();
 
-            if (isApSet && (!string.IsNullOrEmpty(ssid)) && (!string.IsNullOrEmpty(password)))
-            {
-                // Enable the Wireless station interface
-                Wireless80211.Configure(ssid, password);
+            //if (isApSet && (!string.IsNullOrEmpty(ssid)) && (!string.IsNullOrEmpty(password)))
+            //{
+            //    // Enable the Wireless station interface
+            //    Wireless80211.Configure(ssid, password);
 
-                // Disable the Soft AP
-                WirelessAP.Disable();
-                Thread.Sleep(200);
-                Power.RebootDevice();
-            }
+            //    // Disable the Soft AP
+            //    WirelessAP.Disable();
+            //    Thread.Sleep(200);
+            //    Power.RebootDevice();
+            //}
         }
 
         static string ReplaceMessage(string page, string message)

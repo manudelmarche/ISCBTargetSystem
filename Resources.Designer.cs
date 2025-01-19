@@ -25,10 +25,6 @@ namespace ISCBTargetSystem
                 return Resources.manager;
             }
         }
-        internal static string GetString(Resources.StringResources id)
-        {
-            return ((string)(nanoFramework.Runtime.Native.ResourceUtility.GetObject(ResourceManager, id)));
-        }
         internal static byte[] GetBytes(Resources.BinaryResources id)
         {
             return ((byte[])(nanoFramework.Runtime.Native.ResourceUtility.GetObject(ResourceManager, id)));
@@ -38,11 +34,7 @@ namespace ISCBTargetSystem
         {
             favicon = -22914,
             mainPage = -5248,
-        }
-        [System.SerializableAttribute()]
-        internal enum StringResources : short
-        {
-            main = 4691,
+            countdown = 29543,
         }
     }
 }

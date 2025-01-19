@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countdown</title>
+    <script>
+        let countdown = 10;
+        function updateCountdown() {
+            document.getElementById("countdown").innerText = countdown;
+            if (countdown === 0) {
+                document.getElementById("countdownForm").submit();
+            } else {
+                countdown--;
+                setTimeout(updateCountdown, 1000);
+            }
+        }
+        window.onload = function() {
+            updateCountdown();
+        };
+    </script>
+</head>
+<body>
+    <h1>Stand by</h1>
+    <span id="countdown">3</span>
+    <form id="countdownForm" action="/startTargetsAction" method="POST">
+        <input type="hidden" name="submitted" value="true">
+        <input type="hidden" id="originator" name="originator" value="countdown" />
+    </form>
+</body>
+</html>
