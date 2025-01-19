@@ -45,6 +45,17 @@
                 max-width: 100%;
             }
         }
+
+        .center-screen {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .countdown {
+            font-size: 144px;
+        }
     </style>
 
     <title>ISCB Targets System - Countdown</title>
@@ -66,7 +77,7 @@
 </head>
 <body>
     <h1>Stand by</h1>
-    <span id="countdown">10</span>
+    <span id="countdown" class="countdown center-screen">10</span>
     <form id="countdownForm" action="/startTargetsAction" method="POST">
         <input type="hidden" id="originator" name="originator" value="countdown" />
     </form>

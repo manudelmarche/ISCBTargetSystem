@@ -61,7 +61,6 @@ namespace ISCBTargetSystem
             string repetitions = null;
             string countdown = null;
             string originator=null;
-            bool isApSet = false;
             byte[] pageBytes;
 
             switch (request.HttpMethod)
@@ -78,7 +77,7 @@ namespace ISCBTargetSystem
                     {
                         response.ContentType = "text/html";
                         pageBytes = Resources.GetBytes(Resources.BinaryResources.mainPage);
-                        responseString = ReplaceMessage(System.Text.Encoding.UTF8.GetString(pageBytes,0,pageBytes.Length), "");
+                        responseString = System.Text.Encoding.UTF8.GetString(pageBytes,0,pageBytes.Length);
                         OutPutResponse(response, responseString);
                     }
                     break;
@@ -110,34 +109,13 @@ namespace ISCBTargetSystem
                         responseString = "Target practice started";
                     }
 
-
-                    //bool res = Wireless80211.Configure(ssid, password);
-                    //if (res)
-                    //{
-                    //    message += $"<p>And your new IP address should be {Wireless80211.GetCurrentIPAddress()}.</p>";
-                    //}                                           
-
-                    //responseString = CreateMainPage(message);
-
-
-
                     OutPutResponse(response, responseString);
-                    isApSet = true;
+
                     break;
             }
 
             response.Close();
 
-            //if (isApSet && (!string.IsNullOrEmpty(ssid)) && (!string.IsNullOrEmpty(password)))
-            //{
-            //    // Enable the Wireless station interface
-            //    Wireless80211.Configure(ssid, password);
-
-            //    // Disable the Soft AP
-            //    WirelessAP.Disable();
-            //    Thread.Sleep(200);
-            //    Power.RebootDevice();
-            //}
         }
 
         private string ProcessCountdown(String page, string countdown)
@@ -147,16 +125,6 @@ namespace ISCBTargetSystem
             return stringBuilder.ToString();
         }
 
-        static string ReplaceMessage(string page, string message)
-        {
-            int index = page.IndexOf("{message}");
-            if (index >= 0)
-            {
-                return page.Substring(0, index) + message + page.Substring(index + 9);
-            }
-
-            return page;
-        }
 
         static void OutPutResponse(HttpListenerResponse response, string responseString)
         {
@@ -190,34 +158,6 @@ namespace ISCBTargetSystem
             }
 
             return hash;
-        }
-        static string CreateMainPage(string message)
-        {
-
-            return $"<!DOCTYPE html><html>{GetCss()}<body>" +
-                    "<h1>NanoFramework</h1>" +
-                    "<form method='POST'>" +
-                    "<fieldset><legend>Wireless configuration</legend>" +
-                    "Ssid:</br><input type='input' name='ssid' value='' ></br>" +
-                    "Password:</br><input type='password' name='password' value='' >" +
-                    "<br><br>" +
-                    "<input type='submit' value='Save'>" +
-                    "</fieldset>" +
-                    "<b>" + message + "</b>" +
-                    "</form></body></html>";
-        }
-
-        static string GetCss()
-        {
-            return "<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><style>" +
-                "*{box-sizing: border-box}" +
-                "h1,legend {text-align:center;}" +
-                "form {max-width: 250px;margin: 10px auto 0 auto;}" +
-                "fieldset {border-radius: 5px;box-shadow: 3px 3px 15px hsl(0, 0%, 90%);font-size: large;}" +
-                "input {width: 100%;padding: 4px;margin-bottom: 8px;border: 1px solid hsl(0, 0%, 50%);border-radius: 3px;font-size: medium;}" +
-                "input[type=submit]:hover {cursor: pointer;background-color: hsl(0, 0%, 90%);transition: 0.5s;}" +
-                " @media only screen and (max-width: 768px) { form {max-width: 100%;}} " +
-                "</style><title>NanoFramework</title></head>";
         }
     }
 }
