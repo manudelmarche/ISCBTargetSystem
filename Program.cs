@@ -1,6 +1,7 @@
 ﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
+// Modified by E. DELMARCHE
 //
 
 using System;
@@ -29,8 +30,7 @@ namespace ISCBTargetSystem
 
         public static void Main()
         {
-            Debug.WriteLine("Welcome to WiFI Soft AP world!");
-            Console.WriteLine("Welcome to WiFI Soft AP world!");
+            Debug.WriteLine("Welcome to ISCB Target System");
 
             var gpioController = new GpioController();
             GpioPin setupButton = gpioController.OpenPin(SetupPin, PinMode.InputPullUp);

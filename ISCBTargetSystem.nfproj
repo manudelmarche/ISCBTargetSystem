@@ -32,7 +32,6 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="Resources\Images\favicon.png" />
-    <None Include="Resources\favicon.ico.bmp" />
     <Content Include="Resources\Html\main.html" />
   </ItemGroup>
   <ItemGroup>

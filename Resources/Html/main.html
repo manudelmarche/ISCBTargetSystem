@@ -46,17 +46,33 @@
             }
         }
     </style>
-    <title>NanoFramework</title>
+    <title>ISCB Target System</title>
 </head>
  <body>
-  <h1>NanoFramework</h1>
+  <h1>ISCB Target System</h1>
   <form method='POST'>
-    <fieldset><legend>Wireless configuration</legend>
-        Ssid:<br><input type="text" name="ssid" value=""><br>
-        Password:<br><input type="text" name="password" value=""><br>
-        <br>
-        <input type="submit" value="Save">
-    </fieldset>
+      <fieldset>
+          <legend>Targets configuration</legend>
+
+          <label for="timeShown">Time Shown (between 1s and 15s):</label>
+          <br><input type="range" id="timeShown" name="timeShown" value="3" min="1" max="15" oninput="this.nextElementSibling.value = this.value">
+          <output>3</output> seconds<br><br>
+
+          <label for="timeHidden">Time Hidden (between 3s and 20s):</label>
+          <br><input type="range" name="timeHidden" value="7" min="3" max="20" oninput="this.nextElementSibling.value = this.value">
+          <output>7</output> seconds<br><br>
+          
+          <label for="repetition">Repetition (between 3 and 15):</label>
+          <br><input type="range" id="repetition" name="repetition" value="10" min="3" max="15" oninput="this.nextElementSibling.value = this.value">
+          <output>10</output> repetition(s)<br><br>
+          
+          <label for="countdown">Countdown (between 5s and 20s):</label>
+          <br><input type="range" id="countdown" name="countdown" value="10" min="5" max="20" oninput="this.nextElementSibling.value = this.value">
+          <output>10</output> seconds<br><br>
+          <br>
+
+          <input type="submit" value="Start" id="start" name="start">
+      </fieldset>
   <b>{message}</b>
   </form>
  </body>

@@ -37,6 +37,7 @@ namespace ISCBTargetSystem
         internal enum BinaryResources : short
         {
             favicon = -22914,
+            mainPage = -5248,
         }
         [System.SerializableAttribute()]
         internal enum StringResources : short

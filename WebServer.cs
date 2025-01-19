@@ -1,6 +1,7 @@
 ﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
+// Modified by E. DELMARCHE
 //
 
 using System;
@@ -70,7 +71,8 @@ namespace ISCBTargetSystem
                     else
                     {
                         response.ContentType = "text/html";
-                        responseString = ReplaceMessage(Resources.GetString(Resources.StringResources.main), "");
+                        var pageBytes = Resources.GetBytes(Resources.BinaryResources.mainPage);
+                        responseString = ReplaceMessage(System.Text.Encoding.UTF8.GetString(pageBytes,0,pageBytes.Length-1), "");
                         OutPutResponse(response, responseString);
                     }
                     break;
