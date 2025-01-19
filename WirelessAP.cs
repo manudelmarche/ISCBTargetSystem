@@ -9,7 +9,7 @@ using System.Net.NetworkInformation;
 using Iot.Device.DhcpServer;
 using nanoFramework.Runtime.Native;
 
-namespace WifiAP
+namespace ISCBTargetSystem
 {
     /// <summary>
     /// Provides methods and properties to manage a wireless access point.

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace WifiAP
+namespace ISCBTargetSystem
 {
     
     internal partial class Resources
@@ -20,7 +20,7 @@ namespace WifiAP
             {
                 if ((Resources.manager == null))
                 {
-                    Resources.manager = new System.Resources.ResourceManager("WifiAP.Resources", typeof(Resources).Assembly);
+                    Resources.manager = new System.Resources.ResourceManager("ISCBTargetSystem.Resources", typeof(Resources).Assembly);
                 }
                 return Resources.manager;
             }

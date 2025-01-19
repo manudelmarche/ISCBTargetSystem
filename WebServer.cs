@@ -11,7 +11,7 @@ using System.Net;
 using System.Threading;
 using nanoFramework.Runtime.Native;
 
-namespace WifiAP
+namespace ISCBTargetSystem
 {
     public class WebServer
     {

@@ -10,7 +10,7 @@ using System.Net.NetworkInformation;
 using System.Threading;
 using nanoFramework.Networking;
 
-namespace WifiAP
+namespace ISCBTargetSystem
 {
     class Wireless80211
     {

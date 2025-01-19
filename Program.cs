@@ -13,7 +13,7 @@ using Iot.Device.DhcpServer;
 using nanoFramework.Networking;
 using nanoFramework.Runtime.Native;
 
-namespace WifiAP
+namespace ISCBTargetSystem
 {
     public class Program
     {
