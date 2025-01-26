@@ -12,7 +12,10 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading;
+using System.Net.WebSockets;
 using nanoFramework.Runtime.Native;
+using System.Net.WebSockets.Server;
+using System.Net.Http;
 
 namespace ISCBTargetSystem
 {
@@ -20,11 +23,13 @@ namespace ISCBTargetSystem
     {
         HttpListener _listener;
         Thread _serverThread;
+        WebSocketServer _ws;
 
-        public void Start()
+        public void Start(WebSocketServer ws)
         {
             if (_listener == null)
             {
+                _ws = ws;
                 _listener = new HttpListener("http");
                 _serverThread = new Thread(RunServer);
                 _serverThread.Start();
@@ -44,14 +49,30 @@ namespace ISCBTargetSystem
             {
                 var context = _listener.GetContext();
                 if (context != null)
-                    ProcessRequest(context);
+                {
+                    if(ProcessRequest(context))
+                    {
+                        //HttpClient client = new HttpClient();
+                        //client.BaseAddress = new Uri("http://192.168.4.1");
+                        //string formData = "Originator=Shooting";
+                        //byte[] formDataBytes = Encoding.UTF8.GetBytes(formData);
+                        //HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://192.168.4.1")
+                        //{
+                        //    Content = new ByteArrayContent(formDataBytes)
+                        //};
+                        //request.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
+                        //HttpResponseMessage response = client.Send(request);
+
+                    }
+
+                }
             }
             _listener.Close();
 
             _listener = null;
         }
 
-        private void ProcessRequest(HttpListenerContext context)
+        private bool ProcessRequest(HttpListenerContext context,bool isShooting=false)
         {
             var request = context.Request;
             var response = context.Response;
@@ -102,6 +123,7 @@ namespace ISCBTargetSystem
                         response.ContentType = "text/html";
                         pageBytes = Resources.GetBytes(Resources.BinaryResources.countdown);
                         responseString = ProcessCountdown(System.Text.Encoding.UTF8.GetString(pageBytes, 0, pageBytes.Length),countdown);
+                        isShooting = false;
                         
                     }
                     else if (originator == "countdown")
@@ -112,12 +134,14 @@ namespace ISCBTargetSystem
                             response.ContentType = "text/html";
                             pageBytes = Resources.GetBytes(Resources.BinaryResources.shooting);
                             responseString = System.Text.Encoding.UTF8.GetString(pageBytes, 0, pageBytes.Length);
+                            isShooting = true;
                         }
                         else
                         {
                             response.ContentType = "text/html";
                             pageBytes = Resources.GetBytes(Resources.BinaryResources.mainPage);
                             responseString = System.Text.Encoding.UTF8.GetString(pageBytes, 0, pageBytes.Length);
+                            isShooting= false;
                         }
                     }
                     else if (originator == "shooting")
@@ -128,11 +152,21 @@ namespace ISCBTargetSystem
                     }
 
                     OutPutResponse(response, responseString);
-
                     break;
             }
 
+
             response.Close();
+            if(isShooting)
+            {
+                for(int i = 0; i < 10;i++)
+                {
+                    _ws.BroadCast("Gnongnon " + i);
+                    Thread.Sleep(1000);
+                }
+                _ws.BroadCast("Shooting finished");
+            }
+            return isShooting;
 
         }
 

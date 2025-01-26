@@ -54,17 +54,24 @@ namespace ISCBTargetSystem
             }
 
             Console.WriteLine($"Connected with wifi credentials. IP Address: {(_wifiApMode ? WirelessAP.GetIP() : Wireless80211.GetCurrentIPAddress())}");           
+
+            WebSocketServer webSocketServer = new WebSocketServer(new WebSocketServerOptions()
+            {
+                Port = 8080,
+                MaxClients = 10,
+                IsStandAlone = true
+            });
+
             if( _wifiApMode )
             {
-                _server.Start();
+                _server.Start(webSocketServer);
 
             }
-
-            WebSocketServer webSocketServer = new WebSocketServer();
             webSocketServer.Start();
             //Let's echo all incomming messages from clients to all connected clients including the sender. 
             webSocketServer.MessageReceived += WebSocketServer_MesageReceived;
-            Console.WriteLine($"WebSocket server is up and running, connect on: ws://127.0.0.1:{webSocketServer.Port}{webSocketServer.Prefix}");
+
+            Console.WriteLine($"WebSocket server is up and running, connect on: ws://{WirelessAP.GetIP()}:{webSocketServer.Port}{webSocketServer.Prefix}");
 
             // Just wait for now
             // Here you would have the reset of your program using the client WiFI link
