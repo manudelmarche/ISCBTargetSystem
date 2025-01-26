@@ -10,11 +10,14 @@ using System.Device.Wifi;
 using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Net.WebSockets;
+using System.Net.WebSockets.Server;
 using System.Text;
 using System.Threading;
 using Iot.Device.DhcpServer;
 using nanoFramework.Networking;
 using nanoFramework.Runtime.Native;
+
 
 namespace ISCBTargetSystem
 {
@@ -54,11 +57,30 @@ namespace ISCBTargetSystem
             if( _wifiApMode )
             {
                 _server.Start();
+
             }
+
+            WebSocketServer webSocketServer = new WebSocketServer();
+            webSocketServer.Start();
+            //Let's echo all incomming messages from clients to all connected clients including the sender. 
+            webSocketServer.MessageReceived += WebSocketServer_MesageReceived;
+            Console.WriteLine($"WebSocket server is up and running, connect on: ws://127.0.0.1:{webSocketServer.Port}{webSocketServer.Prefix}");
 
             // Just wait for now
             // Here you would have the reset of your program using the client WiFI link
             Thread.Sleep(Timeout.Infinite);
+        }
+
+        private static void WebSocketServer_MesageReceived(object sender, MessageReceivedEventArgs e)
+        {
+            if (e.Frame.MessageType == System.Net.WebSockets.WebSocketFrame.WebSocketMessageType.Text)
+            {
+                Debug.WriteLine($"websocket message: {Encoding.UTF8.GetString(e.Frame.Buffer, 0, e.Frame.Buffer.Length)}");
+            }
+            else
+            {
+                Debug.WriteLine("websocket binary data");
+            }
         }
 
         //private static void NetworkChange_NetworkAPStationChanged(int NetworkIndex, NetworkAPStationEventArgs e)
