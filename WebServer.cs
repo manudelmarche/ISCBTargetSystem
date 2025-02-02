@@ -50,7 +50,7 @@ namespace ISCBTargetSystem
                 var context = _listener.GetContext();
                 if (context != null)
                 {
-                    if(ProcessRequest(context))
+                    if (ProcessRequest(context))
                     {
                         //HttpClient client = new HttpClient();
                         //client.BaseAddress = new Uri("http://192.168.4.1");
@@ -72,102 +72,146 @@ namespace ISCBTargetSystem
             _listener = null;
         }
 
-        private bool ProcessRequest(HttpListenerContext context,bool isShooting=false)
+        private bool ProcessRequest(HttpListenerContext context, bool isShooting = false)
         {
             var request = context.Request;
             var response = context.Response;
-            string responseString="";
+            string responseString = "";
             string timeShown = null;
             string timeHidden = null;
             string repetitions = null;
             string countdown = null;
-            string originator=null;
+            string originator = null;
             byte[] pageBytes;
+            const int defaultTimeVisible = 3;
+            const int defaultTimeHidden = 7;
+            const int defaultRepetitions = 10;
+            const int defaultCountdown = 10;
 
-            switch (request.HttpMethod)
+            try
             {
-                case "GET":
-                    string[] url = request.RawUrl.Split('?');
-                    if (url[0] == "/favicon.ico")
-                    {
-                        response.ContentType = "image/png";
-                        byte[] responseBytes = Resources.GetBytes(Resources.BinaryResources.favicon);
-                        OutPutByteResponse(response, responseBytes);
-                    }
-                    else
-                    {
-                        response.ContentType = "text/html";
-                        pageBytes = Resources.GetBytes(Resources.BinaryResources.mainPage);
-                        responseString = System.Text.Encoding.UTF8.GetString(pageBytes,0,pageBytes.Length);
-                        OutPutResponse(response, responseString);
-                    }
-                    break;
-
-                case "POST":
-                    // Pick up POST parameters from Input Stream
-                    Hashtable hashPars = ParseParamsFromStream(request.InputStream);
-                    originator = (string)hashPars["originator"];
-
-                    if (originator == "main")
-                    {
-                        timeShown = (string)hashPars["timeShown"];
-                        timeHidden = (string)hashPars["timeHidden"];
-                        repetitions = (string)hashPars["repetition"];
-                        countdown = (string)hashPars["countdown"];
-
-                        Debug.WriteLine($"Time targets are shown:" + timeShown);
-                        Debug.WriteLine($"Time targets are hidden:" + timeHidden);
-                        Debug.WriteLine($"Repetitions:" + repetitions);
-                        Debug.WriteLine($"Countdown:" + countdown);
-
-                        response.ContentType = "text/html";
-                        pageBytes = Resources.GetBytes(Resources.BinaryResources.countdown);
-                        responseString = ProcessCountdown(System.Text.Encoding.UTF8.GetString(pageBytes, 0, pageBytes.Length),countdown);
-                        isShooting = false;
-                        
-                    }
-                    else if (originator == "countdown")
-                    {
-                        var abort = (string)hashPars["abort"];
-                        if(abort==null)
+                switch (request.HttpMethod)
+                {
+                    case "GET":
+                        string[] url = request.RawUrl.Split('?');
+                        if (url[0] == "/favicon.ico")
                         {
-                            response.ContentType = "text/html";
-                            pageBytes = Resources.GetBytes(Resources.BinaryResources.shooting);
-                            responseString = System.Text.Encoding.UTF8.GetString(pageBytes, 0, pageBytes.Length);
-                            isShooting = true;
+                            response.ContentType = "image/png";
+                            byte[] responseBytes = Resources.GetBytes(Resources.BinaryResources.favicon);
+                            OutPutByteResponse(response, responseBytes);
                         }
                         else
                         {
                             response.ContentType = "text/html";
                             pageBytes = Resources.GetBytes(Resources.BinaryResources.mainPage);
-                            responseString = System.Text.Encoding.UTF8.GetString(pageBytes, 0, pageBytes.Length);
-                            isShooting= false;
+                            responseString = ProcessMainPage(System.Text.Encoding.UTF8.GetString(pageBytes, 0, pageBytes.Length), defaultTimeVisible, defaultTimeHidden, defaultRepetitions, defaultCountdown);
+                            OutPutResponse(response, responseString);
                         }
-                    }
-                    else if (originator == "shooting")
-                    {
-                        response.ContentType = "text/html";
-                        pageBytes = Resources.GetBytes(Resources.BinaryResources.mainPage);
-                        responseString = System.Text.Encoding.UTF8.GetString(pageBytes, 0, pageBytes.Length);
-                    }
+                        break;
 
-                    OutPutResponse(response, responseString);
-                    break;
-            }
+                    case "POST":
+                        // Pick up POST parameters from Input Stream
+                        Hashtable hashPars = ParseParamsFromStream(request.InputStream);
+                        originator = (string)hashPars["originator"];
 
+                        if (originator == "main")
+                        {
+                            timeShown = (string)hashPars["timeShown"];
+                            ShootingData.timeVisible = Int32.Parse(timeShown);
 
-            response.Close();
-            if(isShooting)
-            {
-                for(int i = 0; i < 10;i++)
-                {
-                    _ws.BroadCast("Gnongnon " + i);
-                    Thread.Sleep(1000);
+                            timeHidden = (string)hashPars["timeHidden"];
+                            ShootingData.timeHidden = Int32.Parse(timeHidden);
+
+                            repetitions = (string)hashPars["repetition"];
+                            ShootingData.repetitions = Int32.Parse(repetitions);
+
+                            countdown = (string)hashPars["countdown"];
+                            ShootingData.countdown = Int32.Parse(countdown);
+
+                            Debug.WriteLine($"Time targets are shown:" + timeShown);
+                            Debug.WriteLine($"Time targets are hidden:" + timeHidden);
+                            Debug.WriteLine($"Repetitions:" + repetitions);
+                            Debug.WriteLine($"Countdown:" + countdown);
+
+                            response.ContentType = "text/html";
+                            pageBytes = Resources.GetBytes(Resources.BinaryResources.countdown);
+                            responseString = ProcessCountdown(System.Text.Encoding.UTF8.GetString(pageBytes, 0, pageBytes.Length), countdown);
+                            isShooting = false;
+
+                        }
+                        else if (originator == "countdown")
+                        {
+                            var abort = (string)hashPars["abort"];
+                            if (abort == null)
+                            {
+                                response.ContentType = "text/html";
+                                pageBytes = Resources.GetBytes(Resources.BinaryResources.shooting);
+                                responseString = System.Text.Encoding.UTF8.GetString(pageBytes, 0, pageBytes.Length);
+                                isShooting = true;
+                            }
+                            else
+                            {
+                                response.ContentType = "text/html";
+                                pageBytes = Resources.GetBytes(Resources.BinaryResources.mainPage);
+                                responseString = ProcessMainPage(System.Text.Encoding.UTF8.GetString(pageBytes, 0, pageBytes.Length), ShootingData.timeVisible, ShootingData.timeHidden, ShootingData.repetitions, ShootingData.countdown);
+                                isShooting = false;
+                            }
+                        }
+                        else if (originator == "shooting")
+                        {
+                            response.ContentType = "text/html";
+                            pageBytes = Resources.GetBytes(Resources.BinaryResources.mainPage);
+                            responseString = ProcessMainPage(System.Text.Encoding.UTF8.GetString(pageBytes, 0, pageBytes.Length), ShootingData.timeVisible, ShootingData.timeHidden, ShootingData.repetitions, ShootingData.countdown);
+                        }
+
+                        OutPutResponse(response, responseString);
+                        break;
                 }
-                _ws.BroadCast("Shooting finished");
+
+
+                response.Close();
+
+                Thread.Sleep(1000);
+
+                if (isShooting)
+                {
+                    bool isVisible = true;
+
+                    for (int i = 0; i < ShootingData.repetitions; i++)
+                    {
+                        //code to show targets
+
+                        //currentRep#maxReps#isVisible
+                        _ws.BroadCast((i + 1).ToString() + "#" + ShootingData.repetitions.ToString() + "#" + (isVisible ? "visible" : "hidden"));
+                        Thread.Sleep(ShootingData.timeVisible * 1000);
+
+                        //code to hide targets
+                        isVisible = false;
+                        _ws.BroadCast((i + 1).ToString() + "#" + ShootingData.repetitions.ToString() + "#" + (isVisible ? "visible" : "hidden"));
+                        Thread.Sleep(ShootingData.timeHidden * 1000);
+                        isVisible = true;
+                    }
+                    _ws.BroadCast("Shooting finished");
+                    //code to show targets
+                }
+
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }            
             return isShooting;
 
+        }
+
+        private string ProcessMainPage(string page, int defaultTimeVisible, int defaultTimeHidden, int defaultRepetitions, int defaultCountdown)
+        {
+            StringBuilder stringBuilder = new StringBuilder(page);
+            stringBuilder.Replace("{{timeVisible}}", defaultTimeVisible.ToString());
+            stringBuilder.Replace("{{timeHidden}}",defaultTimeHidden.ToString());
+            stringBuilder.Replace("{{repetitions}}",defaultRepetitions.ToString());
+            stringBuilder.Replace("{{countdown}}",defaultCountdown.ToString());
+            return stringBuilder.ToString();
         }
 
         private string ProcessCountdown(String page, string countdown)
