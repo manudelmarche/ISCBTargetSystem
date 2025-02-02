@@ -16,6 +16,7 @@ using System.Net.WebSockets;
 using nanoFramework.Runtime.Native;
 using System.Net.WebSockets.Server;
 using System.Net.Http;
+using Iot.Device.MulticastDns.Entities;
 
 namespace ISCBTargetSystem
 {
@@ -88,6 +89,8 @@ namespace ISCBTargetSystem
             const int defaultRepetitions = 10;
             const int defaultCountdown = 10;
 
+            Thread shootingLoop = new Thread(() => Shoot(_ws));
+
             try
             {
                 switch (request.HttpMethod)
@@ -159,6 +162,13 @@ namespace ISCBTargetSystem
                         }
                         else if (originator == "shooting")
                         {
+                            var abort = (string)hashPars["abort"];
+                            if (abort!=null)
+                            {   
+                                //If the user aborts the shooting session, we cancel the shooting loop and reset the targets to visible position
+                                shootingLoop.Abort();
+                                //TODO: code to show targets
+                            }
                             response.ContentType = "text/html";
                             pageBytes = Resources.GetBytes(Resources.BinaryResources.mainPage);
                             responseString = ProcessMainPage(System.Text.Encoding.UTF8.GetString(pageBytes, 0, pageBytes.Length), ShootingData.timeVisible, ShootingData.timeHidden, ShootingData.repetitions, ShootingData.countdown);
@@ -175,24 +185,7 @@ namespace ISCBTargetSystem
 
                 if (isShooting)
                 {
-                    bool isVisible = true;
-
-                    for (int i = 0; i < ShootingData.repetitions; i++)
-                    {
-                        //code to show targets
-
-                        //currentRep#maxReps#isVisible
-                        _ws.BroadCast((i + 1).ToString() + "#" + ShootingData.repetitions.ToString() + "#" + (isVisible ? "visible" : "hidden"));
-                        Thread.Sleep(ShootingData.timeVisible * 1000);
-
-                        //code to hide targets
-                        isVisible = false;
-                        _ws.BroadCast((i + 1).ToString() + "#" + ShootingData.repetitions.ToString() + "#" + (isVisible ? "visible" : "hidden"));
-                        Thread.Sleep(ShootingData.timeHidden * 1000);
-                        isVisible = true;
-                    }
-                    _ws.BroadCast("Shooting finished");
-                    //code to show targets
+                    shootingLoop.Start();
                 }
 
             }
@@ -202,6 +195,27 @@ namespace ISCBTargetSystem
             }            
             return isShooting;
 
+        }
+
+        private void Shoot(WebSocketServer ws)
+        {
+            bool isVisible = true;
+            for (int i = 0; i < ShootingData.repetitions; i++)
+            {
+                //TODO: code to show targets
+
+                //currentRep#maxReps#isVisible
+                ws.BroadCast((i + 1).ToString() + "#" + ShootingData.repetitions.ToString() + "#" + (isVisible ? "visible" : "hidden"));
+                Thread.Sleep(ShootingData.timeVisible * 1000);
+
+                //TODO: code to hide targets
+                isVisible = false;
+                ws.BroadCast((i + 1).ToString() + "#" + ShootingData.repetitions.ToString() + "#" + (isVisible ? "visible" : "hidden"));
+                Thread.Sleep(ShootingData.timeHidden * 1000);
+                isVisible = true;
+            }
+            ws.BroadCast("Shooting finished");
+            //TODO: code to show targets
         }
 
         private string ProcessMainPage(string page, int defaultTimeVisible, int defaultTimeHidden, int defaultRepetitions, int defaultCountdown)
